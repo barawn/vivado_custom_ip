@@ -1,0 +1,404 @@
+                            ; AXI4-Lite bridge.
+                            ; These are all in the constant-optimized space (0x00-0x0F)
+                            ; and can use OUTPUTK instructions. Nothing else can.
+                            CONSTANT axi_data_0, 08
+                            CONSTANT axi_data_1, 09
+                            CONSTANT axi_data_2, 0A
+                            CONSTANT axi_data_3, 0B
+                            CONSTANT axi_address_0, 0C
+                            CONSTANT axi_address_1, 0D
+                            CONSTANT axi_address_2, 0E
+                            CONSTANT axi_address_3, 0F
+                            CONSTANT axi_control, 00
+                            CONSTANT datamover_mm2s_status, 20
+                            CONSTANT datamover_mm2s_control, 21
+                            CONSTANT datamover_mm2s_btt_0, 22
+                            CONSTANT datamover_mm2s_btt_1, 23
+                            CONSTANT datamover_s2mm_status, 24
+                            CONSTANT datamover_s2mm_control, 25
+                            CONSTANT datamover_s2mm_brcvd_0, 26
+                            CONSTANT datamover_s2mm_brcvd_1, 27
+                            CONSTANT mac_0, 40
+                            CONSTANT mac_1, 41
+                            CONSTANT mac_2, 42
+                            CONSTANT mac_3, 43
+                            CONSTANT mac_4, 44
+                            CONSTANT mac_5, 45
+                            CONSTANT axie_MDIOADDR_L, E4
+                            CONSTANT axie_MDIOADDR_H, 07
+                            CONSTANT axie_MDIOWR_L, E8
+                            CONSTANT axie_MDIOWR_H, 07
+                            CONSTANT axie_MDIORD_L, EC
+                            CONSTANT axie_MDIORD_H, 07
+                            CONSTANT axie_MDIOCTRL_L, F0
+                            CONSTANT axie_MDIOCTRL_H, 07
+                            CONSTANT axie_TXPINGLEN_L, F4
+                            CONSTANT axie_TXPINGLEN_H, 07
+                            CONSTANT axie_GIE_L, F8
+                            CONSTANT axie_GIE_H, 07
+                            CONSTANT axie_TXPINGCTRL_L, FC
+                            CONSTANT axie_TXPINGCTRL_H, 07
+                            CONSTANT axie_TXPONGLEN_L, F4
+                            CONSTANT axie_TXPONGLEN_H, 0F
+                            CONSTANT axie_TXPONGCTRL_L, FC
+                            CONSTANT axie_TXPONGCTRL_H, 0F
+                            CONSTANT axie_RXPINGCTRL_L, FC
+                            CONSTANT axie_RXPINGCTRL_H, 17
+                            CONSTANT axie_RXPONGCTRL_L, FC
+                            CONSTANT axie_RXPONGCTRL_H, 1F
+                            CONSTANT axie_RXPING_TYPELEN_L, 0C
+                            CONSTANT axie_RXPING_TYPELEN_H, 10
+                            CONSTANT axie_RXPONG_TYPELEN_L, 0C
+                            CONSTANT axie_RXPONG_TYPELEN_H, 18
+                            NAMEREG s8, RX_current_buffer
+                            NAMEREG s9, TX_current_buffer
+                            NAMEREG sA, mm2s_status
+                            NAMEREG sB, s2mm_status
+                            ; AXI Accesses:
+                            ; OUTPUT addr_l, axi_base+axi_address
+                            ; OUTPUT addr_h, axi_address_1
+                            ; LOAD   sF,     01  (or 03 for write)
+                            ; OUTPUT sF,     axi_control
+                            ; jp1: INPUT  sF,     axi_control
+                            ; TEST sF, 08
+                            ; JUMP Z jp1
+                            ; data to write/read is at axi_data_0+[3:0]
+                            ;
+                            ; We don't make these functions because it's much faster not to.
+                     reset: 
+                            ; The AXI EthernetLite is crap:
+                            ; the MAC address gets written BIG ENDIAN into the damn
+                            ; transmit buffer. So
+                            ; mac[5] at 0x00
+                            ; mac[4] at 0x01
+                            ; mac[3] at 0x02
+                            ; mac[2] at 0x03
+                            ; mac[1] at 0x04
+                            ; mac[0] at 0x05
+                            ;; Write mac[3:0] into address 0x0000
+                            OUTPUTK 00, axi_address_0
+                            OUTPUTK 00, axi_address_1
+                            INPUT s0, mac_5
+                            INPUT s1, mac_4
+                            INPUT s2, mac_3
+                            INPUT s3, mac_2
+                            OUTPUT s0, axi_data_0
+                            OUTPUT s1, axi_data_1
+                            OUTPUT s2, axi_data_2
+                            OUTPUT s3, axi_data_3
+                            OUTPUTK 03, axi_control
+                 reset_jp1: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, reset_jp1
+                            ;; Write mac[5:4] into address 0x0004
+                            OUTPUTK 04, axi_address_0
+                            OUTPUTK 00, axi_address_1
+                            INPUT s0, mac_1
+                            INPUT s1, mac_0
+                            OUTPUT s0, axi_data_0
+                            OUTPUT s1, axi_data_1
+                            OUTPUTK 00, axi_data_2
+                            OUTPUTK 00, axi_data_3
+                            OUTPUTK 03, axi_control
+                 reset_jp2: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, reset_jp2
+                            ;; Now write 0x03 to address 0x7FC (TXPINGCTRL)
+                            OUTPUTK axie_TXPINGCTRL_L, axi_address_0
+                            OUTPUTK axie_TXPINGCTRL_H, axi_address_1
+                            OUTPUTK 03, axi_data_0
+                            OUTPUTK 00, axi_data_1
+                            OUTPUTK 00, axi_data_2
+                            OUTPUTK 00, axi_data_3
+                            OUTPUTK 03, axi_control
+                 reset_jp3: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, reset_jp3
+                            ; Now read from 0x7FC and check status/program bits.
+                 reset_jp4: 
+                            OUTPUTK 01, axi_control
+                 reset_jp5: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, reset_jp5
+                            ; Check status/program bits (bits 0 & 1)
+                            INPUT sF, axi_data_0
+                            AND sF, 03
+                            JUMP NZ, reset_jp4
+                            ;; OK, MAC address programmed.
+                            ; Clear buffer status/MM2S status.
+                            LOAD RX_current_buffer, 00
+                            LOAD mm2s_status, 00
+                            LOAD TX_current_buffer, 00
+                            LOAD s2mm_status, 00
+                      main: 
+                            ;; Main loop
+                            ;; 1: Check RX buffer.
+                            CALL check_RX_buffer
+                            ;; 2: Check TX buffers.
+                            CALL check_TX_buffer
+                            ;; 3: Check MM2S Status.
+                            CALL check_MM2S_status
+                            ;; 4: Check S2MM Status.
+                            CALL check_S2MM_status
+                            JUMP main
+                            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                            ;; Check for an outgoing buffer.
+                            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+           check_TX_buffer: 
+                            ; Check to see if a transaction is pending.
+                            INPUT s0, datamover_s2mm_control
+                            TEST s0, 20
+                            ; If not set, do nothing.
+                            RETURN Z
+                            ; It's set. Are both buffers pending? (not likely, but... whatever)
+                            COMPARE s2mm_status, 03
+                            RETURN Z
+                            ; Nope, so we need to do something.
+                            ; Read from either 0x07FC or 0x0FFC.
+                            ; Current buffer is either 0x00 or 0x08 (it's the high byte base address). Copy it.
+                            LOAD s1, TX_current_buffer
+                            ADD s1, 07
+                            OUTPUTK FC, axi_address_0
+                            OUTPUT s1, axi_address_1
+                            OUTPUTK 01, axi_control
+       check_TX_buffer_jp1: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, check_TX_buffer_jp1
+                            INPUT sF, axi_data_0
+                            ; Is the busy bit set? (note that *we* set this when an S2MM transaction completes)
+                            TEST sF, 01
+                            ; If not, poll it. It'll get cleared when that buffer gets sent out.
+                            RETURN C
+                            ; It's not set - so it's available.
+                            ; Execute a DataMover command to stream data into the buffer.
+                            ; So we need to set buffer (bit 3) and start (bit 0).
+                            ; s1 is either 07 or 0F, and we want it to be 01 or 09.
+                            AND s1, 09
+                            OUTPUT s1, datamover_s2mm_control
+                            ; Now we need to set the right bit in s2mm_buffer_status.
+                            TEST TX_current_buffer, 08
+                            JUMP NZ, check_TX_buffer_jp2
+                            OR s2mm_status, 01
+                            JUMP check_TX_buffer_jp3
+       check_TX_buffer_jp2: 
+                            OR s2mm_status, 02
+       check_TX_buffer_jp3: 
+                            XOR TX_current_buffer, 08
+                            RETURN 
+                            ; Lifecycle of received buffers:
+                            ; 3x quick buffers:
+                            ; BEGINNING: RX_current_buffer=0, mm2s_status=0
+                            ; PING BUFFER FILLS, COMMAND ISSUED: RX_current_buffer=8, mm2s_status=1
+                            ; PONG BUFFER FILLS, COMMAND ISSUED: RX_current_buffer=0, mm2s_status=3
+                            ; PING COMMAND COMPLETION DONE: RX_current_buffer=0, mm2s_status=2
+                            ; PING BUFFER FILLS AGAIN, COMMAND ISSUED: RX_current_buffer=8, mm2s_status=3
+                            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                            ;; Check for an incoming buffer.
+                            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+           check_RX_buffer: 
+                            ; Check to see if 2x MM2S commands are pending.
+                            COMPARE mm2s_status, 03
+                            ; If so, bail out. Nothing else to do.
+                            RETURN Z
+                            ; Need to read from 0x17FC or 0x1FFC.
+                            ; Current buffer is either 0x00 or 0x08. Copy it.
+                            LOAD s1, RX_current_buffer
+                            ; Add 0x17 (to make 0x17 or 0x1F)
+                            ADD s1, 17
+                            OUTPUTK FC, axi_address_0
+                            OUTPUT s1, axi_address_1
+                            OUTPUTK 01, axi_control
+       check_RX_buffer_jp1: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, check_RX_buffer_jp1
+                            INPUT sF, axi_data_0
+                            ; Is the status bit set?
+                            TEST sF, 01
+                            ; No, so we're done.
+                            RETURN Z
+                            ; OK, so now we actually have something. Jump back to base + 0x0C.
+                            ; This is after the source/dest addresses (12 bytes = 3 ints)
+                            ; s1 is either 0x17 or 0x1F. Drop the low 3 bits.
+                            AND s1, 18
+                            OUTPUTK 0C, axi_address_0
+                            OUTPUT s1, axi_address_1
+                            OUTPUTK 01, axi_control
+       check_RX_buffer_jp2: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, check_RX_buffer_jp2
+                            ; Now check ethertype. This is in the low byte, since it's
+                            ; the 13th byte received (e.g. base + 0x0C)
+                            ; Needs to be 0x08.
+                            INPUT s2, axi_data_0
+                            COMPARE s2, 08
+                            JUMP NZ, dump_RX_buffer
+                            ; Check the next byte. Needs to be 0x06 (ARP) or 0x00 (IPv4)
+                            INPUT s2, axi_data_1
+                            COMPARE s2, 06
+                            JUMP Z, check_RX_buffer_ARP
+                            COMPARE s2, 00
+                            JUMP NZ, dump_RX_buffer
+        check_RX_buffer_IP: 
+                            ; it's an IP packet. Add 4 to the address (0x10).
+                            ; axi_address_1 doesn't need to change.
+                            OUTPUTK 10, axi_address_0
+                            OUTPUTK 01, axi_control
+    check_RX_buffer_IP_jp1: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, check_RX_buffer_IP_jp1
+                            ; We're now at base + 0x10. Grab the next two bytes.
+                            ; First is the most-significant byte (big-endian!)
+                            INPUT s3, axi_data_0
+                            ; Next is the least-significant byte (big-endian!)
+                            INPUT s2, axi_data_1
+                            ; Add 18. (source+dest+typelen+FCS)
+                            ADD s2, 12
+                            ADDCY s3, 00
+                            COMPARE s2, 40
+                            COMPARECY s3, 00
+                            JUMP C, check_RX_buffer_IP_jp2
+                            JUMP RX_output_mm2s_command
+    check_RX_buffer_IP_jp2: 
+                            LOAD s2, 40
+                            JUMP RX_output_mm2s_command
+       check_RX_buffer_ARP: 
+                            LOAD s2, 40
+                            LOAD s3, 00
+                            ; Output the MM2S command.
+                            ; Bytes to transfer is in s2/s3.
+    RX_output_mm2s_command: 
+                            ; s1 is from our last AXI address, which was either 0x1810 or 0x1010 (so s1=0x18 or 0x10).
+                            ; So we just set the bottom bit. Top bit is unimportant (not used).
+                            OR s1, 01
+                            OUTPUT s2, datamover_mm2s_btt_0
+                            OUTPUT s3, datamover_mm2s_btt_1
+                            OUTPUT s1, datamover_mm2s_control
+                            ; Now set the appropriate bit in mm2s_status
+                            TEST RX_current_buffer, 08
+                            JUMP NZ, RX_output_mm2s_command_jp1
+                            OR mm2s_status, 01
+                            JUMP RX_output_mm2s_command_jp2
+RX_output_mm2s_command_jp1: 
+                            OR mm2s_status, 02
+RX_output_mm2s_command_jp2: 
+                            XOR RX_current_buffer, 08
+                            RETURN 
+                            ; Abandon the current buffer (not IP or ICMP)
+            dump_RX_buffer: 
+                            LOAD s1, RX_current_buffer
+                            ADD s1, 17
+                            OUTPUTK FC, axi_address_0
+                            OUTPUT s1, axi_address_1
+                            OUTPUTK 00, axi_data_0
+                            OUTPUTK 00, axi_data_1
+                            OUTPUTK 00, axi_data_2
+                            OUTPUTK 00, axi_data_3
+                            OUTPUTK 03, axi_control
+        dump_RX_buffer_jp1: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, dump_RX_buffer_jp1
+                            ; Still need to toggle the buffer.
+                            XOR RX_current_buffer, 08
+                            RETURN 
+                            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                            ;; Check for completion of incoming buffer.
+                            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+         check_MM2S_status: 
+                            INPUT sF, datamover_mm2s_control
+                            ; is the done bit set?
+                            TEST sF, 04
+                            RETURN Z
+                            ; Yes, it is. Now check the received status byte.
+                            INPUT sF, datamover_mm2s_status
+                            TEST sF, 08
+                            ; Is this the pong buffer?
+                            JUMP NZ, check_mm2s_status_jp1
+                            ; The 'buffer' bit is not set, so this is the ping buffer.
+                            ; Clear mm2s_status bit 1.
+                            AND mm2s_status, 02
+                            JUMP check_mm2s_status_jp2
+     check_mm2s_status_jp1: 
+                            ; The 'buffer' bit is set, so this is the pong buffer.
+                            ; Clear mm2s_status bit 0.
+                            AND mm2s_status, 01
+     check_mm2s_status_jp2: 
+                            ; sF is now 00 or 08.
+                            ; We want to write 0x0 to 0x17FC or 0x1FFC (RX ping or pong control)
+                            ; So copy sF, add 17 to it, and combine it with FC.
+                            LOAD s1, sF
+                            ADD s1, 17
+                            OUTPUTK FC, axi_address_0
+                            OUTPUT s1, axi_address_1
+                            OUTPUTK 00, axi_data_0
+                            OUTPUTK 00, axi_data_1
+                            OUTPUTK 00, axi_data_2
+                            OUTPUTK 00, axi_data_3
+                            OUTPUTK 03, axi_control
+     check_mm2s_status_jp3: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, check_mm2s_status_jp3
+                            LOAD sF, 04
+                            ; Clear the done bit to accept the next status word.
+                            OUTPUT sF, datamover_mm2s_control
+                            ; Done.
+                            RETURN 
+                            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                            ;; Check for completion of outgoing buffer.
+                            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+         check_S2MM_status: 
+                            INPUT sF, datamover_s2mm_control
+                            TEST sF, 04
+                            RETURN Z
+                            ; Yes, it is. Now check the received status byte.
+                            INPUT sF, datamover_s2mm_status
+                            TEST sF, 08
+                            JUMP NZ, check_s2mm_status_jp1
+                            AND s2mm_status, 02
+                            JUMP check_s2mm_status_jp2
+     check_s2mm_status_jp1: 
+                            AND s2mm_status, 01
+     check_s2mm_status_jp2: 
+                            INPUT s2, datamover_s2mm_brcvd_0
+                            INPUT s3, datamover_s2mm_brcvd_1
+                            AND sF, 08
+                            ; sF is now 00 or 08.
+                            ; We want to write (s3,s2) to 0x07F4 or 0x0FF4.
+                            LOAD s1, sF
+                            ADD s1, 07
+                            OUTPUTK F4, axi_address_0
+                            OUTPUT s1, axi_address_1
+                            OUTPUT s2, axi_data_0
+                            OUTPUT s3, axi_data_1
+                            OUTPUTK 00, axi_data_2
+                            OUTPUTK 00, axi_data_3
+                            OUTPUTK 03, axi_control
+     check_s2mm_status_jp3: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, check_s2mm_status_jp3
+                            ; Now write 01 to transmit control. Move forward 2 registers. (0x07FC/0x0FFC)
+                            OUTPUTK FC, axi_address_0
+                            OUTPUT s1, axi_address_1
+                            OUTPUTK 01, axi_data_0
+                            OUTPUTK 00, axi_data_1
+                            OUTPUTK 00, axi_data_2
+                            OUTPUTK 00, axi_data_3
+                            OUTPUTK 03, axi_control
+     check_s2mm_status_jp4: 
+                            INPUT sF, axi_control
+                            TEST sF, 08
+                            JUMP Z, check_s2mm_status_jp4
+                            ; Now clear the DONE bit to accept next.
+                            LOAD sF, 04
+                            OUTPUT sF, datamover_s2mm_control
+                            RETURN 
