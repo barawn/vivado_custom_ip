@@ -7,7 +7,7 @@
   <spirit:componentInstances>
     <spirit:componentInstance>
       <spirit:instanceName>axi4lite_pb_bridge_0</spirit:instanceName>
-      <spirit:componentRef spirit:vendor="ohio-state.edu" spirit:library="user" spirit:name="axi4lite_pb_bridge" spirit:version="1.1"/>
+      <spirit:componentRef spirit:vendor="ohio-state.edu" spirit:library="user" spirit:name="axi4lite_pb_bridge" spirit:version="1.7"/>
       <spirit:configurableElementValues>
         <spirit:configurableElementValue spirit:referenceId="BUSIFPARAM_VALUE.M_AXI.ADDR_WIDTH">13</spirit:configurableElementValue>
         <spirit:configurableElementValue spirit:referenceId="BUSIFPARAM_VALUE.M_AXI.ARUSER_WIDTH">0</spirit:configurableElementValue>

@@ -122,15 +122,11 @@ module picoblaze_ethernet_lite_controller #(
 
 
     //% AXI4-Lite bridge. The bridge eats up the constant port space, so it gets the k_write_strobe.
-    //% We need to redefine the port_id it gets, though, to use k_write_strobe - we need to strip off the top 4 bits
-    //% in that case and set them to 0.
-    wire [7:0] bridge_port_id;
-    assign bridge_port_id[7:4] = (k_write_strobe) ? 4'h0 : port_id[7:4];
-    assign bridge_port_id[3:0] = port_id[3:0];
-    axi4lite_pb_bridge_0 u_bridge(.port_id(bridge_port_id),
+    axi4lite_pb_bridge_0 u_bridge(.port_id(port_id),
                  .in_port(axi4lite_bridge_in_port),
                  .out_port(out_port),
-                 .write_strobe(write_strobe || k_write_strobe),
+                 .write_strobe(write_strobe),
+                 .k_write_strobe(k_write_strobe),
                  .read_strobe(read_strobe),
                  .m_axi_aclk(m_axi_aclk),
                  .m_axi_aresetn(m_axi_aresetn),
