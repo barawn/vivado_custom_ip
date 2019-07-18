@@ -23,7 +23,9 @@
 //%        CONTROL[2]   = AXI_ACTIVE   : Indicates an AXI access is still ongoing.
 //%        CONTROL[3]   = AXI_DONE     : This bit is set when the AXI transaction completes. Cleared when AXI_BEGIN is set.
 //%        CONTROL[5:4] = AXI_RESP     : Contains the RESP[1:0] to the last transaction (either RRESP or BRESP depending on AXI_WNR).
-//%
+//%        CONTROL[6]   = AXI_RSTADDR  : Set to 1 to reset all AXI address bits to 0.
+//%        CONTROL[7]   = AXI_RSTDATA  : Set to 1 to reset all AXI data bits to 0.
+//% 
 //% This module is currently synchronous. Wouldn't be too hard to make it asynchronous, just no need right now.
 module axi4lite_pb_bridge #(parameter C_ADDRESS_WIDTH=32, parameter C_DATA_WIDTH=32, parameter C_BASE_ADDRESS = 8'h00)(
         // PicoBlaze interface.
@@ -213,14 +215,16 @@ module axi4lite_pb_bridge #(parameter C_ADDRESS_WIDTH=32, parameter C_DATA_WIDTH
         
         for (d_iter=0;d_iter<C_DATA_WIDTH;d_iter=d_iter+1) begin : DL
             always @(posedge m_axi_aclk) begin : DL_LOGIC
-                if (axi_rready && m_axi_rvalid) axi_data[d_iter] <= m_axi_rdata[d_iter];
+                if (out_port[7] && axi_control_write_access) axi_data[d_iter] <= 1'b0;
+                else if (axi_rready && m_axi_rvalid) axi_data[d_iter] <= m_axi_rdata[d_iter];
                 else if (axi_data_write_access[d_iter/8]) axi_data[d_iter] <= out_port[d_iter % 8];
             end
         end
         for (a_iter=0;a_iter<C_ADDRESS_WIDTH;a_iter=a_iter+1) begin : AL
             always @(posedge m_axi_aclk) begin : AL_LOGIC
                 // Remap as before, by requiring axi_port_id[3:2]==2'b11.
-                if (axi_address_write_access[a_iter/8])
+                if (out_port[6] && axi_control_write_access) axi_address[a_iter] <= 1'b0;
+                else if (axi_address_write_access[a_iter/8])
                     axi_address[a_iter] <= out_port[a_iter % 8];
             end
         end
