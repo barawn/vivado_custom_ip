@@ -161,7 +161,7 @@
       <spirit:parameters>
         <spirit:parameter>
           <spirit:name>POLARITY</spirit:name>
-          <spirit:value spirit:id="BUSIFPARAM_VALUE.S_AXI_ARESETN.POLARITY" spirit:choiceRef="choice_list_74b5137e">ACTIVE_LOW</spirit:value>
+          <spirit:value spirit:id="BUSIFPARAM_VALUE.S_AXI_ARESETN.POLARITY" spirit:choiceRef="choice_list_9d8b0d81">ACTIVE_LOW</spirit:value>
         </spirit:parameter>
       </spirit:parameters>
     </spirit:busInterface>
@@ -633,7 +633,7 @@
   </spirit:model>
   <spirit:choices>
     <spirit:choice>
-      <spirit:name>choice_list_74b5137e</spirit:name>
+      <spirit:name>choice_list_9d8b0d81</spirit:name>
       <spirit:enumeration>ACTIVE_HIGH</spirit:enumeration>
       <spirit:enumeration>ACTIVE_LOW</spirit:enumeration>
     </spirit:choice>
@@ -668,12 +668,6 @@
       <spirit:file>
         <spirit:name>src/axi_pwm.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>C:/cygwin64/home/barawn/firmware/osu_ip/axi_pwm/sim/axi_pwm_sim.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>xil_defaultlib</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -742,15 +736,15 @@
       </xilinx:taxonomies>
       <xilinx:displayName>axi_pwm_v1_0</xilinx:displayName>
       <xilinx:definitionSource>package_project</xilinx:definitionSource>
-      <xilinx:coreRevision>2</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2019-08-22T15:00:03Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>3</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2020-07-17T14:55:10Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
-        <xilinx:tag xilinx:name="ohio-state.edu:user:axi_pwm:1.0_ARCHIVE_LOCATION">c:/cygwin64/home/barawn/firmware/osu_ip/axi_pwm</xilinx:tag>
+        <xilinx:tag xilinx:name="ohio-state.edu:user:axi_pwm:1.0_ARCHIVE_LOCATION">x:/vivado_custom_ip/axi_pwm</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2018.2</xilinx:xilinxVersion>
-      <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="83b8e7b0"/>
+      <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="be148a02"/>
       <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="c6e68ede"/>
       <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="d1ca91e0"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="53c18254"/>
