@@ -4,8 +4,7 @@ proc init_gui { IPINST } {
   #Adding Page
   set Page_0 [ipgui::add_page $IPINST -name "Page 0"]
   ipgui::add_param $IPINST -name "C_NUM_PWM" -parent ${Page_0}
-  set C_PWM_WIDTH [ipgui::add_param $IPINST -name "C_PWM_WIDTH" -parent ${Page_0}]
-  set_property tooltip {PWM output width} ${C_PWM_WIDTH}
+  ipgui::add_param $IPINST -name "C_PWM_WIDTH" -parent ${Page_0}
 
 
 }
