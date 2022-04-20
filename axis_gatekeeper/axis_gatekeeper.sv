@@ -41,7 +41,7 @@ module axis_gatekeeper #(
             // Don't count up if we would overflow.
             if (!(s_axis_tvalid && s_axis_tready && local_tlast) && !(&allow_count))
                 allow_count <= allow_count + 1;
-            else 
+        end else begin
             // Counting down doesn't need a guard because
             // s_axis_tready is already qualified on being nonzero
             if (s_axis_tvalid && s_axis_tready && local_tlast)
