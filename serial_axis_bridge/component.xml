@@ -668,19 +668,25 @@
         <xilinx:taxonomy>/UserIP</xilinx:taxonomy>
       </xilinx:taxonomies>
       <xilinx:displayName>serial_axis_bridge_v1_5</xilinx:displayName>
+      <xilinx:autoFamilySupportLevel>level_1</xilinx:autoFamilySupportLevel>
       <xilinx:definitionSource>package_project</xilinx:definitionSource>
-      <xilinx:coreRevision>2</xilinx:coreRevision>
+      <xilinx:coreRevision>3</xilinx:coreRevision>
       <xilinx:upgrades>
         <xilinx:canUpgradeFrom>ohio-state.edu:user:serial_axis_bridge:1.0</xilinx:canUpgradeFrom>
       </xilinx:upgrades>
-      <xilinx:coreCreationDateTime>2019-08-22T17:23:59Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2020-09-15T20:32:07Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="ohio-state.edu:user:serial_axis_bridge:1.0_ARCHIVE_LOCATION">c:/cygwin64/home/barawn/firmware/osu_ip/serial_axis_bridge</xilinx:tag>
         <xilinx:tag xilinx:name="ohio-state.edu:user:serial_axis_bridge:1.5_ARCHIVE_LOCATION">c:/cygwin64/home/barawn/firmware/osu_ip/serial_axis_bridge</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@73c84edd_ARCHIVE_LOCATION">v:/vivado_custom_ip/serial_axis_bridge</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@69af888b_ARCHIVE_LOCATION">v:/vivado_custom_ip/serial_axis_bridge</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@3ec4ab00_ARCHIVE_LOCATION">v:/vivado_custom_ip/serial_axis_bridge</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@62c8f4ef_ARCHIVE_LOCATION">v:/vivado_custom_ip/serial_axis_bridge</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@170c7572_ARCHIVE_LOCATION">v:/vivado_custom_ip/serial_axis_bridge</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
-      <xilinx:xilinxVersion>2018.2</xilinx:xilinxVersion>
+      <xilinx:xilinxVersion>2019.2</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="1e56d922"/>
       <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="8864030d"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="85bd7150"/>

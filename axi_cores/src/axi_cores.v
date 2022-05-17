@@ -14,6 +14,7 @@ module axi_cores
    (PWM,
     PWM_OEB,
     clk100_o,
+    clk100_locked_o,
     clk200,
     iic_rtl_0_scl_i,
     iic_rtl_0_scl_o,
@@ -39,6 +40,7 @@ module axi_cores
   output reset_complete;
   input serial_rx_i;
   output serial_tx_o;
+  output clk100_locked_o;
 
   (* CONN_BUS_INFO = "S01_AXI_1 xilinx.com:interface:aximm:1.0 AXI4 ARADDR" *) (* DONT_TOUCH *) wire [15:0]S01_AXI_1_ARADDR;
   (* CONN_BUS_INFO = "S01_AXI_1 xilinx.com:interface:aximm:1.0 AXI4 ARBURST" *) (* DONT_TOUCH *) wire [1:0]S01_AXI_1_ARBURST;
@@ -212,6 +214,7 @@ module axi_cores
   assign axi_iic_0_IIC_SCL_I = iic_rtl_0_scl_i;
   assign axi_iic_0_IIC_SDA_I = iic_rtl_0_sda_i;
   assign clk100_o = clk_wiz_clk_out1;
+  assign clk100_locked_o = clk_wiz_locked;
   assign clk_in1_0_1 = clk200;
   assign iic_rtl_0_scl_o = axi_iic_0_IIC_SCL_O;
   assign iic_rtl_0_scl_t = axi_iic_0_IIC_SCL_T;
