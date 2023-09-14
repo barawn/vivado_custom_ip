@@ -148,12 +148,12 @@ module axi_pwm #(parameter C_NUM_PWM = 2, parameter C_PWM_WIDTH = 24) (
             wire [1:0] pwm_reset;
             wire [1:0] pwm_output;
             assign PWM[i] = pwm_output[0];
-            assign pwm_load[0] = S_AXI_AWADDR[8] && (S_AXI_AWADDR[7:0] == i) && axi_write;
+            assign pwm_load[0] = S_AXI_AWADDR[8] && (S_AXI_AWADDR[7:2] == i) && axi_write;
             assign pwm_reset = (S_AXI_AWADDR == 9'h000) && axi_write && S_AXI_WDATA[i/2];
             if (i+1 == C_NUM_PWM) begin : SINGLE_PWM
                 assign pwm_load[1] = 1'b0;
             end else begin : DOUBLE_PWM
-                assign pwm_load[1] = S_AXI_AWADDR[8] && (S_AXI_AWADDR[7:0] == i+1) && axi_write;
+                assign pwm_load[1] = S_AXI_AWADDR[8] && (S_AXI_AWADDR[7:2] == i+1) && axi_write;
                 assign PWM[i+1] = pwm_output[1];
             end
             async_pwm_output #(.C_PWM_WIDTH(C_PWM_WIDTH)) u_pwm(.pwm_value_clk_i(S_AXI_ACLK),.pwm_value_i(S_AXI_WDATA[C_PWM_WIDTH-1:0]),
